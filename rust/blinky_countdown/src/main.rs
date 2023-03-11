@@ -4,7 +4,6 @@
 use embedded_hal::digital::v2::OutputPin;
 use panic_halt as _;
 use rp_pico::entry;
-use rp_pico::hal::prelude::*;
 use rp_pico::hal::pac;
 use rp_pico::hal;
 use fugit::ExtU32;
@@ -14,24 +13,7 @@ use nb;
 #[entry]
 fn main() -> ! {
     let mut pac = pac::Peripherals::take().unwrap();
-    let core = pac::CorePeripherals::take().unwrap();
     
-    // Set up the watchdog driver
-    let mut watchdog = hal::Watchdog::new(pac.WATCHDOG);
-
-    // Setup up a clock at 125MHz
-    let clocks = hal::clocks::init_clocks_and_plls(
-        rp_pico::XOSC_CRYSTAL_FREQ,
-        pac.XOSC,
-        pac.CLOCKS,
-        pac.PLL_SYS,
-        pac.PLL_USB,
-        &mut pac.RESETS,
-        &mut watchdog,
-    )
-    .ok()
-    .unwrap();
-
     // Configure the Timer peripheral in count-down mode
     let timer = hal::Timer::new(pac.TIMER, &mut pac.RESETS);
     let mut count_down = timer.count_down();
