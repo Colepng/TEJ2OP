@@ -1,11 +1,9 @@
 #![no_std]
 #![no_main]
 
-use embedded_hal::digital::v2::OutputPin;
 use embedded_hal::PwmPin;
 use panic_halt as _;
 use rp_pico::entry;
-use rp_pico::hal::prelude::*;
 use rp_pico::hal::pac;
 use rp_pico::hal;
 use cortex_m::prelude::*;
@@ -19,24 +17,7 @@ const HIGH: u16 = 25000;
 #[entry]
 fn main() -> ! {
     let mut pac = pac::Peripherals::take().unwrap();
-    let core = pac::CorePeripherals::take().unwrap();
     
-    // Set up the watchdog driver
-    let mut watchdog = hal::Watchdog::new(pac.WATCHDOG);
-
-    // Setup up a clock at 125MHz
-    let clocks = hal::clocks::init_clocks_and_plls(
-        rp_pico::XOSC_CRYSTAL_FREQ,
-        pac.XOSC,
-        pac.CLOCKS,
-        pac.PLL_SYS,
-        pac.PLL_USB,
-        &mut pac.RESETS,
-        &mut watchdog,
-    )
-    .ok()
-    .unwrap();
-
     let timer = hal::Timer::new(pac.TIMER, &mut pac.RESETS);
     let mut count_down = timer.count_down();
 
