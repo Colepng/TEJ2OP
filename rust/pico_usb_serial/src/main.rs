@@ -1,24 +1,14 @@
 #![no_std]
 #![no_main]
 
-use alloc::fmt::format;
 use embedded_hal::digital::v2::OutputPin;
 use panic_halt as _;
 use rp_pico::entry;
-use rp_pico::hal::prelude::*;
 use rp_pico::hal::pac;
 use rp_pico::hal;
-use fugit::ExtU32;
-use cortex_m::prelude::*;
-use nb;
-
 use usb_device::{class_prelude::*, prelude::*};
 use usbd_serial::SerialPort;
-use core::fmt::Write;
-use core::ptr::write;
-use core::str::from_utf8;
 use core::result::Result::{Ok, Err};
-use heapless::String;
 
 #[macro_use]
 extern crate alloc;
@@ -52,7 +42,6 @@ fn main() -> ! {
     }
 
     let mut pac = pac::Peripherals::take().unwrap();
-    let core = pac::CorePeripherals::take().unwrap();
     
     // Set up the watchdog driver
     let mut watchdog = hal::Watchdog::new(pac.WATCHDOG);
@@ -101,12 +90,6 @@ fn main() -> ! {
         .device_class(2) // from: https://www.usb.org/defined-class-codes
         .build();
 
-    let mut said_hello = false;
-
-    // Configure the Timer peripheral in count-down mode
-    let timer = hal::Timer::new(pac.TIMER, &mut pac.RESETS);
-    let mut count_down = timer.count_down();
-
     let sio = hal::Sio::new(pac.SIO);
    
     // Set the pins up according to their function on the pi pico 
@@ -119,7 +102,6 @@ fn main() -> ! {
 
     let mut led_pin = pins.led.into_push_pull_output();
     let mut text: Vec<u8> = vec![];
-    let mut i:usize = 0;
     
     loop {
         if usb_dev.poll(&mut [&mut serial]) {
@@ -130,11 +112,10 @@ fn main() -> ! {
                 Ok(0) => {
                     serial.write(b"empty buffer");
                 }
-                Err(e) => {
+                Err(_e) => {
                     //  Do nothing
                 }
                 Ok(nums_of_bytes_read) => {
-                    i += 1;
                     text.push(buf[0]);
                     if compare(&text, "ON\r") {
                         led_pin.set_high();
@@ -142,30 +123,7 @@ fn main() -> ! {
                     else if compare(&text, "OFF\r") {
                         led_pin.set_low();
                     }
-                    // serial.write(b"test");
-                    // serial.write(&(&text[i]).to_ne_bytes());
-                    // serial.write(&(&buf[0]).to_ne_bytes());
-                    // serial.write(b"\n");
-                    // serial.write(format!("{}", i).as_bytes());
-                    // spnerial.write(format!("{}", buf[0]).as_bytes());
-                    // serial.write(&text);
-                    // serial.write(&buf);
-                    // if text.len() >= 2{
-                    //     serial.write(b"\n the text bytes are below\n");
-                    //     serial.write(format!("{:#?}", &text[text.len()-2..]).as_bytes());
-                    // }
-                    // serial.write(format!("{:#?}", text.len()-1).as_bytes());
-                    // serial.write(b"\n the on byts is below\n");
-                    // serial.write(format!("{:#?}", "on".as_bytes()).as_bytes());
-                    // serial.write(&text[text.len()-2..text.len()+1]);
-                    // serial.write(concat_bytes!(text, "\n"));
-                    // serial.write(&text[0..3]);
 
-                    // serial.write(from_utf8(&text).unwrap().as_bytes());
-                    // serial.write(&nums_of_bytes_read.to_ne_bytes());
-                    // if nums_of_bytes_read == 1 {
-                    //     serial.write("1".as_bytes());
-                    // }
                     let mut wr_ptr = &buf[..nums_of_bytes_read];
                     while !wr_ptr.is_empty() {
                         match serial.write(wr_ptr) {
