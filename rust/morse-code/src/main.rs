@@ -156,6 +156,13 @@ fn main() -> ! {
                     // Since the number of bytes read is always 1 I am just appending the first
                     // element of buffer
                     collect_buf.push(buffer[0]);
+                    if compare(&collect_buf, "a") {
+                        MorseCode().a(&mut count_down, &mut led_pin);
+                        wait(&mut count_down, UNIT*3);
+                    } else if compare(&collect_buf, "b") {
+                        MorseCode().b(&mut count_down, &mut led_pin);
+                        wait(&mut count_down, UNIT*3);
+                    }
                 }
             }
         }
