@@ -2,13 +2,22 @@
 #![no_std]
 #![no_main]
 
-use rp_pico::{entry};
+use rp_pico::{entry, hal::timer::CountDown};
 use rp_pico::hal::pac;
 use rp_pico::hal;
 use panic_halt as _;
+use cortex_m::prelude::*;
+use embedded_hal::digital::v2::OutputPin;
+use crate::hal::gpio::bank0::Gpio25;
+use crate::hal::gpio::Pin;
+use crate::hal::gpio::PushPull;
+use crate::hal::gpio::Output;
 
 use usb_device::{class_prelude::*, prelude::*};
 use usbd_serial::SerialPort;
+
+use fugit::ExtU32;
+use nb;
 
 // sets up an allocator
 #[macro_use]
@@ -20,6 +29,54 @@ use alloc::vec::*;
 #[global_allocator]
 static HEAP: Heap = Heap::empty();
 
+// function used to compare a 
+fn compare(vector: &Vec<u8>, text: &str) -> bool {
+    if vector.len() >= text.len() {
+        if &vector[vector.len()-text.len()..] == text.as_bytes() {
+            return true;
+        }
+    }
+    false
+}
+
+fn wait(count_down: &mut CountDown, wait_for:u32) {
+    count_down.start(wait_for.millis());
+    let _ = nb::block!(count_down.wait());
+}
+
+const UNIT: u32 = 250;
+
+fn dot(led: &mut Pin<Gpio25, Output<PushPull>>, count_down: &mut CountDown) {
+    led.set_high();
+    wait(count_down, UNIT);
+    led.set_low();
+}
+
+fn dash(led: &mut Pin<Gpio25, Output<PushPull>>, count_down: &mut CountDown){
+    led.set_high();
+    wait(count_down, UNIT*3);
+    led.set_low();
+}
+
+struct MorseCode();
+
+impl MorseCode {
+    fn a(&self, count_down: &mut CountDown, led: &mut Pin<Gpio25, Output<PushPull>>) {
+        dot(led, count_down);
+        wait(count_down, UNIT);
+        dash(led, count_down);
+    }
+
+    fn b(&self, count_down: &mut CountDown, led: &mut Pin<Gpio25, Output<PushPull>>) {
+        dash(led, count_down);
+        wait(count_down, UNIT);
+        dot(led, count_down);
+        wait(count_down, UNIT);
+        dot(led, count_down);
+        wait(count_down, UNIT);
+        dot(led, count_down);
+    }
+}
 #[entry]
 fn main() -> ! {
     // Initialize the allocator
@@ -49,7 +106,7 @@ fn main() -> ! {
     .unwrap();
 
     let timer = hal::Timer::new(pac.TIMER, &mut pac.RESETS);
-    let mut _count_down = timer.count_down();
+    let mut count_down = timer.count_down();
     
     // Set up the USB driver
     let usb_bus = UsbBusAllocator::new(hal::usb::UsbBus::new(
@@ -61,10 +118,10 @@ fn main() -> ! {
     ));
 
     // Set up USB Communications Class Device driver
-    let mut _serial = SerialPort::new(&usb_bus);
+    let mut serial = SerialPort::new(&usb_bus);
    
     // Create a USB device with a fake vendor ID and product ID
-    let mut _usb_dev = UsbDeviceBuilder::new(&usb_bus, UsbVidPid(0x16c0, 0x27dd))
+    let mut usb_dev = UsbDeviceBuilder::new(&usb_bus, UsbVidPid(0x16c0, 0x27dd))
         .manufacturer("Fake company")
         .product("Serial port")
         .serial_number("TEST")
@@ -74,14 +131,33 @@ fn main() -> ! {
     let sio = hal::Sio::new(pac.SIO);
 
     // Set the pins according to their function on the pi pico
-    let _pins = rp_pico::Pins::new(
+    let pins = rp_pico::Pins::new(
         pac.IO_BANK0,
         pac.PADS_BANK0,
         sio.gpio_bank0,
         &mut pac.RESETS,
     );
 
-    loop {
+    let mut led_pin = pins.led.into_push_pull_output();
+    let mut collect_buf: Vec<u8> = vec![];
 
+    loop {
+        if usb_dev.poll(&mut [&mut serial]) {
+            let mut buffer = [0u8; 64];
+            
+            match serial.read(&mut buffer[..]) {
+                Ok(0) => {
+                    // Buffer is empty
+                }
+                Err(_e) => {
+                    // An error has occurred 
+                }
+                Ok(_nums_of_bytes_read) => {
+                    // Since the number of bytes read is always 1 I am just appending the first
+                    // element of buffer
+                    collect_buf.push(buffer[0]);
+                }
+            }
+        }
     }
 }
