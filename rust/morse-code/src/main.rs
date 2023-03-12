@@ -76,6 +76,206 @@ impl MorseCode {
         wait(count_down, UNIT);
         dot(led, count_down);
     }
+    
+    fn c(&self, count_down: &mut CountDown, led: &mut Pin<Gpio25, Output<PushPull>>) {
+        dash(led, count_down);
+        wait(count_down, UNIT);
+        dot(led, count_down);
+        wait(count_down, UNIT);
+        dash(led, count_down);
+        wait(count_down, UNIT);
+        dot(led, count_down);
+    } 
+
+    fn d(&self, count_down: &mut CountDown, led: &mut Pin<Gpio25, Output<PushPull>>)  {
+        dash(led, count_down);
+        wait(count_down, UNIT);
+        dot(led, count_down);
+        wait(count_down, UNIT);
+        dot(led, count_down);
+    }
+
+    fn e(&self, count_down: &mut CountDown, led: &mut Pin<Gpio25, Output<PushPull>>)  {
+        dot(led, count_down);
+    }
+
+    fn f(&self, count_down: &mut CountDown, led: &mut Pin<Gpio25, Output<PushPull>>)  {
+        dot(led, count_down);
+        wait(count_down, UNIT);
+        dot(led, count_down);
+        wait(count_down, UNIT);
+        dash(led, count_down);
+        wait(count_down, UNIT);
+        dot(led, count_down);
+    }
+
+    fn g(&self, count_down: &mut CountDown, led: &mut Pin<Gpio25, Output<PushPull>>)  {
+        dash(led, count_down);
+        wait(count_down, UNIT);
+        dash(led, count_down);
+        wait(count_down, UNIT);
+        dot(led, count_down);
+    }
+
+    fn h(&self, count_down: &mut CountDown, led: &mut Pin<Gpio25, Output<PushPull>>)  {
+        dot(led, count_down);
+        wait(count_down, UNIT);
+        dot(led, count_down);
+        wait(count_down, UNIT);
+        dot(led, count_down);
+        wait(count_down, UNIT);
+        dot(led, count_down);
+    }
+
+    fn i(&self, count_down: &mut CountDown, led: &mut Pin<Gpio25, Output<PushPull>>)  {
+        dot(led, count_down);
+        wait(count_down, UNIT);
+        dot(led, count_down);
+    }
+
+    fn j(&self, count_down: &mut CountDown, led: &mut Pin<Gpio25, Output<PushPull>>)  {
+        dot(led, count_down);
+        wait(count_down, UNIT);
+        dash(led, count_down);
+        wait(count_down, UNIT);
+        dash(led, count_down);
+        wait(count_down, UNIT);
+        dash(led, count_down);
+    }
+
+    fn k(&self, count_down: &mut CountDown, led: &mut Pin<Gpio25, Output<PushPull>>)  {
+        dash(led, count_down);
+        wait(count_down, UNIT);
+        dot(led, count_down);
+        wait(count_down, UNIT);
+        dash(led, count_down);
+    }
+
+    fn l(&self, count_down: &mut CountDown, led: &mut Pin<Gpio25, Output<PushPull>>)  {
+        dot(led, count_down);
+        wait(count_down, UNIT);
+        dash(led, count_down);
+        wait(count_down, UNIT);
+        dot(led, count_down);
+        wait(count_down, UNIT);
+        dot(led, count_down);
+    }
+
+    fn m(&self, count_down: &mut CountDown, led: &mut Pin<Gpio25, Output<PushPull>>)  {
+        dash(led, count_down);
+        wait(count_down, UNIT);
+        dash(led, count_down);
+    }
+
+    fn n(&self, count_down: &mut CountDown, led: &mut Pin<Gpio25, Output<PushPull>>)  {
+        dash(led, count_down);
+        wait(count_down, UNIT);
+        dot(led, count_down);
+    }
+
+    fn o(&self, count_down: &mut CountDown, led: &mut Pin<Gpio25, Output<PushPull>>)  {
+        dash(led, count_down);
+        wait(count_down, UNIT);
+        dash(led, count_down);
+        wait(count_down, UNIT);
+        dash(led, count_down);
+    }
+
+    fn p(&self, count_down: &mut CountDown, led: &mut Pin<Gpio25, Output<PushPull>>)  {
+        dot(led, count_down);
+        wait(count_down, UNIT);
+        dash(led, count_down);
+        wait(count_down, UNIT);
+        dash(led, count_down);
+        wait(count_down, UNIT);
+        dot(led, count_down);
+    }
+
+    fn q(&self, count_down: &mut CountDown, led: &mut Pin<Gpio25, Output<PushPull>>)  {
+        dash(led, count_down);
+        wait(count_down, UNIT);
+        dash(led, count_down);
+        wait(count_down, UNIT);
+        dot(led, count_down);
+        wait(count_down, UNIT);
+        dash(led, count_down);
+    }
+
+    fn r(&self, count_down: &mut CountDown, led: &mut Pin<Gpio25, Output<PushPull>>)  {
+        dot(led, count_down);
+        wait(count_down, UNIT);
+        dash(led, count_down);
+        wait(count_down, UNIT);
+        dot(led, count_down);
+    }
+
+    fn s(&self, count_down: &mut CountDown, led: &mut Pin<Gpio25, Output<PushPull>>)  {
+        dot(led, count_down);
+        wait(count_down, UNIT);
+        dot(led, count_down);
+        wait(count_down, UNIT);
+        dot(led, count_down);
+    }
+
+    fn t(&self, count_down: &mut CountDown, led: &mut Pin<Gpio25, Output<PushPull>>)  {
+        dash(led, count_down);
+    }
+
+    fn u(&self, count_down: &mut CountDown, led: &mut Pin<Gpio25, Output<PushPull>>)  {
+        dot(led, count_down);
+        wait(count_down, UNIT);
+        dot(led, count_down);
+        wait(count_down, UNIT);
+        dash(led, count_down);
+    }
+
+    fn v(&self, count_down: &mut CountDown, led: &mut Pin<Gpio25, Output<PushPull>>)  {
+        dot(led, count_down);
+        wait(count_down, UNIT);
+        dot(led, count_down);
+        wait(count_down, UNIT);
+        dot(led, count_down);
+        wait(count_down, UNIT);
+        dash(led, count_down);
+    }
+
+    fn w(&self, count_down: &mut CountDown, led: &mut Pin<Gpio25, Output<PushPull>>)  {
+        dot(led, count_down);
+        wait(count_down, UNIT);
+        dash(led, count_down);
+        wait(count_down, UNIT);
+        dash(led, count_down);
+    }
+
+    fn x(&self, count_down: &mut CountDown, led: &mut Pin<Gpio25, Output<PushPull>>)  {
+        dash(led, count_down);
+        wait(count_down, UNIT);
+        dot(led, count_down);
+        wait(count_down, UNIT);
+        dot(led, count_down);
+        wait(count_down, UNIT);
+        dash(led, count_down);
+    }
+
+    fn y(&self, count_down: &mut CountDown, led: &mut Pin<Gpio25, Output<PushPull>>)  {
+        dash(led, count_down);
+        wait(count_down, UNIT);
+        dot(led, count_down);
+        wait(count_down, UNIT);
+        dash(led, count_down);
+        wait(count_down, UNIT);
+        dash(led, count_down);
+    }
+
+    fn z(&self, count_down: &mut CountDown, led: &mut Pin<Gpio25, Output<PushPull>>)  {
+        dash(led, count_down);
+        wait(count_down, UNIT);
+        dash(led, count_down);
+        wait(count_down, UNIT);
+        dot(led, count_down);
+        wait(count_down, UNIT);
+        dot(led, count_down);
+    }
 }
 #[entry]
 fn main() -> ! {
