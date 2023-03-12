@@ -340,6 +340,7 @@ fn main() -> ! {
 
     let mut led_pin = pins.led.into_push_pull_output();
     let mut collect_buf: Vec<u8> = vec![];
+    let mut current_word: Vec<u8> = vec![];
 
     loop {
         if usb_dev.poll(&mut [&mut serial]) {
@@ -356,11 +357,91 @@ fn main() -> ! {
                     // Since the number of bytes read is always 1 I am just appending the first
                     // element of buffer
                     collect_buf.push(buffer[0]);
+
+                    // RESETS collect_buf value when a carriage return is dectected
+                    // if collect_buf[collect_buf.len()] == 13 {
+                    //     current_word = collect_buf;
+                    //     collect_buf = vec![];
+                    // }
+
+                    // TODO change to match statment
                     if compare(&collect_buf, "a") {
                         MorseCode().a(&mut count_down, &mut led_pin);
                         wait(&mut count_down, UNIT*3);
                     } else if compare(&collect_buf, "b") {
                         MorseCode().b(&mut count_down, &mut led_pin);
+                        wait(&mut count_down, UNIT*3);
+                    } else if compare(&collect_buf, "c") {
+                        MorseCode().c(&mut count_down, &mut led_pin);
+                        wait(&mut count_down, UNIT*3);
+                    } else if compare(&collect_buf, "d") {
+                        MorseCode().d(&mut count_down, &mut led_pin);
+                        wait(&mut count_down, UNIT*3);
+                    } else if compare(&collect_buf, "e") {
+                        MorseCode().e(&mut count_down, &mut led_pin);
+                        wait(&mut count_down, UNIT*3);
+                    } else if compare(&collect_buf, "f") {
+                        MorseCode().f(&mut count_down, &mut led_pin);
+                        wait(&mut count_down, UNIT*3);
+                    } else if compare(&collect_buf, "g") {
+                        MorseCode().g(&mut count_down, &mut led_pin);
+                        wait(&mut count_down, UNIT*3);
+                    } else if compare(&collect_buf, "h") {
+                        MorseCode().h(&mut count_down, &mut led_pin);
+                        wait(&mut count_down, UNIT*3);
+                    } else if compare(&collect_buf, "i") {
+                        MorseCode().i(&mut count_down, &mut led_pin);
+                        wait(&mut count_down, UNIT*3);
+                    } else if compare(&collect_buf, "j") {
+                        MorseCode().j(&mut count_down, &mut led_pin);
+                        wait(&mut count_down, UNIT*3);
+                    } else if compare(&collect_buf, "k") {
+                        MorseCode().k(&mut count_down, &mut led_pin);
+                        wait(&mut count_down, UNIT*3);
+                    } else if compare(&collect_buf, "l") {
+                        MorseCode().l(&mut count_down, &mut led_pin);
+                        wait(&mut count_down, UNIT*3);
+                    } else if compare(&collect_buf, "m") {
+                        MorseCode().m(&mut count_down, &mut led_pin);
+                        wait(&mut count_down, UNIT*3);
+                    } else if compare(&collect_buf, "n") {
+                        MorseCode().n(&mut count_down, &mut led_pin);
+                        wait(&mut count_down, UNIT*3);
+                    } else if compare(&collect_buf, "o") {
+                        MorseCode().o(&mut count_down, &mut led_pin);
+                        wait(&mut count_down, UNIT*3);
+                    } else if compare(&collect_buf, "p") {
+                        MorseCode().p(&mut count_down, &mut led_pin);
+                        wait(&mut count_down, UNIT*3);
+                    } else if compare(&collect_buf, "q") {
+                        MorseCode().q(&mut count_down, &mut led_pin);
+                        wait(&mut count_down, UNIT*3);
+                    } else if compare(&collect_buf, "r") {
+                        MorseCode().r(&mut count_down, &mut led_pin);
+                        wait(&mut count_down, UNIT*3);
+                    } else if compare(&collect_buf, "s") {
+                        MorseCode().s(&mut count_down, &mut led_pin);
+                        wait(&mut count_down, UNIT*3);
+                    } else if compare(&collect_buf, "t") {
+                        MorseCode().t(&mut count_down, &mut led_pin);
+                        wait(&mut count_down, UNIT*3);
+                    } else if compare(&collect_buf, "u") {
+                        MorseCode().u(&mut count_down, &mut led_pin);
+                        wait(&mut count_down, UNIT*3);
+                    } else if compare(&collect_buf, "v") {
+                        MorseCode().v(&mut count_down, &mut led_pin);
+                        wait(&mut count_down, UNIT*3);
+                    } else if compare(&collect_buf, "w") {
+                        MorseCode().w(&mut count_down, &mut led_pin);
+                        wait(&mut count_down, UNIT*3);
+                    } else if compare(&collect_buf, "x") {
+                        MorseCode().x(&mut count_down, &mut led_pin);
+                        wait(&mut count_down, UNIT*3);
+                    } else if compare(&collect_buf, "y") {
+                        MorseCode().y(&mut count_down, &mut led_pin);
+                        wait(&mut count_down, UNIT*3);
+                    } else if compare(&collect_buf, "z") {
+                        MorseCode().z(&mut count_down, &mut led_pin);
                         wait(&mut count_down, UNIT*3);
                     }
                 }
