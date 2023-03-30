@@ -1,3 +1,6 @@
 [submodule "Number-System-Converter"]
 	path = Number-System-Converter
 	url = https://github.com/Colepng/Number-System-Converter
+[submodule "TEJ2OP-Website"]
+	path = TEJ2OP-Website
+	url = https://github.com/Colepng/TEJ2OP-Website
