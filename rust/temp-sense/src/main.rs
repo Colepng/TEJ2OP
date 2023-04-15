@@ -104,37 +104,15 @@ fn main() -> ! {
     let mut temp_sense = adc.enable_temp_sensor();
 
     let mut led_pin = pins.led.into_push_pull_output();
-    let mut text: Vec<u8> = vec![];
 
     loop {
+        // https://electrocredible.com/raspberry-pi-pico-temperature-sensor-tutorial/
         let temperature_adc_counts: u16 = adc.read(&mut temp_sense).unwrap();
         let adc_volts: f64 = temperature_adc_counts as f64 * (3.3 / 4095.0);
         let temp: f64 = 27.0 - ((adc_volts - 0.706)/0.001721);
         if usb_dev.poll(&mut [&mut serial]) {
-            let mut buf = [0u8; 64];
-            let serial_read = serial.read(&mut buf[..]);
             let _ = serial.write(format!("temperature_adc_counts {temperature_adc_counts}\n").as_bytes());
             let _ = serial.write(format!("temperature {temp}\n").as_bytes());
-
-            match serial_read {
-                Ok(0) => {}
-                Err(_e) => {
-                    //  Do nothing
-                }
-                Ok(nums_of_bytes_read) => {
-                    text.push(buf[0]);
-
-                    let mut wr_ptr = &buf[..nums_of_bytes_read];
-                    while !wr_ptr.is_empty() {
-                        match serial.write(wr_ptr) {
-                            Ok(len) => wr_ptr = &wr_ptr[len..],
-                            // On error, just drop unwritten data.
-                            // One possible error is Err(WouldBlock), meaning the USB write buffer is full.
-                            Err(_) => break,
-                        }
-                    }
-                }
-            }
         }
     }
 }
