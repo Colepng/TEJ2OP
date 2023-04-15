@@ -3,6 +3,8 @@
 
 use core::result::Result::{Err, Ok};
 use cortex_m::Peripherals;
+use embedded_hal::Pwm;
+use embedded_hal::PwmPin;
 use embedded_hal::adc::OneShot;
 use panic_halt as _;
 use rp_pico::entry;
@@ -97,13 +99,25 @@ fn main() -> ! {
         &mut pac.RESETS,
     );
 
+    // init pwm
+    let mut pwm_slices = hal::pwm::Slices::new(pac.PWM, &mut pac.RESETS);
+
+    // Configure PWM4
+    let pwm = &mut pwm_slices.pwm4;
+    pwm.set_ph_correct();
+    pwm.enable();
+
+    // Output channel B on PWM4 to the LED pin
+    let channel = &mut pwm.channel_b;
+    channel.output_to(pins.led);
+
     // Setup adc
     let mut adc = Adc::new(pac.ADC, &mut pac.RESETS);
 
     // Enable the temperature sensor
     let mut temp_sense = adc.enable_temp_sensor();
 
-    let mut led_pin = pins.led.into_push_pull_output();
+    // let mut led_pin = pins.led.into_push_pull_output();
 
     loop {
         // https://electrocredible.com/raspberry-pi-pico-temperature-sensor-tutorial/
@@ -111,8 +125,12 @@ fn main() -> ! {
         let adc_volts: f64 = temperature_adc_counts as f64 * (3.3 / 4095.0);
         let temp: f64 = 27.0 - ((adc_volts - 0.706)/0.001721);
         if usb_dev.poll(&mut [&mut serial]) {
-            let _ = serial.write(format!("temperature_adc_counts {temperature_adc_counts}\n").as_bytes());
+            // let _ = serial.write(format!("temperature_adc_counts {temperature_adc_counts}\n").as_bytes());
             let _ = serial.write(format!("temperature {temp}\n").as_bytes());
+            let output = ((temp * 1000.0) - 26000.0) as u16;
+            let _ = serial.write(format!("{output}\n").as_bytes());
+            channel.set_duty(output);
+
         }
     }
 }
