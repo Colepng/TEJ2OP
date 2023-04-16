@@ -168,6 +168,10 @@ fn main() -> ! {
                             "temp" => {
                                 let _ = serial.write(format!("temperature {temp}\n").as_bytes());
                             }
+                            "flash" => {
+                                let _ = serial.write(b"entering flash mode");
+                                hal::rom_data::reset_to_usb_boot(25, 0);
+                            }
                             "" => {}
                             _ => {
                                 let _ = serial
