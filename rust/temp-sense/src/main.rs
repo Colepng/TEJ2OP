@@ -165,7 +165,9 @@ fn main() -> ! {
                         .unwrap();
 
                         match command {
-            // let _ = serial.write(format!("temperature {temp}\n").as_bytes());
+                            "temp" => {
+                                let _ = serial.write(format!("temperature {temp}\n").as_bytes());
+                            }
                             "" => {}
                             _ => {
                                 let _ = serial
