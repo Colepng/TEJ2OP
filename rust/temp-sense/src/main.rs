@@ -17,6 +17,7 @@ use usbd_serial::SerialPort;
 #[macro_use]
 extern crate alloc;
 
+use alloc::str::from_utf8;
 use alloc::vec::*;
 use embedded_alloc::Heap;
 
@@ -120,6 +121,7 @@ fn main() -> ! {
     // let mut led_pin = pins.led.into_push_pull_output();
     let mut text: Vec<u8> = Vec::new();
     let mut prompt: bool = false;
+    let mut command: &str = "";
 
     loop {
         // https://electrocredible.com/raspberry-pi-pico-temperature-sensor-tutorial/
@@ -153,10 +155,26 @@ fn main() -> ! {
                     if text[text.len() - 1] == b'\r' {
                         prompt = false;
                     }
+                    if !prompt {
+                        command = from_utf8(
+                            &text[..text
+                                .iter()
+                                .position(|x| x == &b' ' || x == &b'\r' || x == &b'\n')
+                                .unwrap()],
+                        )
+                        .unwrap();
 
-            // let _ = serial.write(format!("temperature_adc_counts {temperature_adc_counts}\n").as_bytes());
+                        match command {
             // let _ = serial.write(format!("temperature {temp}\n").as_bytes());
-            // let _ = serial.write(format!("{output}\n").as_bytes());
+                            "" => {}
+                            _ => {
+                                let _ = serial
+                                    .write(format!("command not found: {command}\n").as_bytes());
+                            }
+                        }
+
+                        text = Vec::new();
+            }
             channel.set_duty(output);
         }
     }
