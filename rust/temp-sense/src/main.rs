@@ -123,14 +123,14 @@ fn main() -> ! {
         // https://electrocredible.com/raspberry-pi-pico-temperature-sensor-tutorial/
         let temperature_adc_counts: u16 = adc.read(&mut temp_sense).unwrap();
         let adc_volts: f64 = temperature_adc_counts as f64 * (3.3 / 4095.0);
-        let temp: f64 = 27.0 - ((adc_volts - 0.706)/0.001721);
+        let temp: f64 = 27.0 - ((adc_volts - 0.706) / 0.001721);
+        let output = ((temp * 1000.0) - 26000.0) as u16;
+
         if usb_dev.poll(&mut [&mut serial]) {
             // let _ = serial.write(format!("temperature_adc_counts {temperature_adc_counts}\n").as_bytes());
-            let _ = serial.write(format!("temperature {temp}\n").as_bytes());
-            let output = ((temp * 1000.0) - 26000.0) as u16;
-            let _ = serial.write(format!("{output}\n").as_bytes());
+            // let _ = serial.write(format!("temperature {temp}\n").as_bytes());
+            // let _ = serial.write(format!("{output}\n").as_bytes());
             channel.set_duty(output);
-
         }
     }
 }
