@@ -118,6 +118,7 @@ fn main() -> ! {
     let mut temp_sense = adc.enable_temp_sensor();
 
     // let mut led_pin = pins.led.into_push_pull_output();
+    let mut text: Vec<u8> = Vec::new();
 
     loop {
         // https://electrocredible.com/raspberry-pi-pico-temperature-sensor-tutorial/
@@ -127,6 +128,23 @@ fn main() -> ! {
         let output = ((temp * 1000.0) - 26000.0) as u16;
 
         if usb_dev.poll(&mut [&mut serial]) {
+            let mut usb_buffer: [u8; 64] = [0u8; 64];
+
+            match serial.read(&mut usb_buffer) {
+                Ok(0) => {}
+                Err(_) => {}
+                Ok(n_bytes_read) => {
+                    text.push(usb_buffer[0]);
+
+                    let mut wr_ptr = &usb_buffer[..n_bytes_read];
+                    while !wr_ptr.is_empty() {
+                        match serial.write(wr_ptr) {
+                            Ok(len) => wr_ptr = &wr_ptr[len..],
+                            Err(_) => break,
+                        }
+                    }
+
+
             // let _ = serial.write(format!("temperature_adc_counts {temperature_adc_counts}\n").as_bytes());
             // let _ = serial.write(format!("temperature {temp}\n").as_bytes());
             // let _ = serial.write(format!("{output}\n").as_bytes());
