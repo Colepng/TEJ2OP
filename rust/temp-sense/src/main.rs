@@ -25,6 +25,12 @@ use embedded_alloc::Heap;
 #[global_allocator]
 static HEAP: Heap = Heap::empty();
 
+#[derive(PartialEq, Debug)]
+enum LedMode {
+    Pwm,
+    Digital,
+}
+
 #[entry]
 fn main() -> ! {
     // Initialize the allocator BEFORE you use it
@@ -102,7 +108,7 @@ fn main() -> ! {
 
     // Enable the temperature sensor
     let mut temp_sense = adc.enable_temp_sensor();
-    let mut offset: f64 = 26000.0;
+    let mut offset: f64 = 26.0;
 
     let mut temperature_adc_counts: u16;
     let mut adc_volts: f64;
@@ -116,6 +122,7 @@ fn main() -> ! {
     let mut args: Vec<&str>;
 
     let mut led_enabled: bool = true;
+    let mut led_mode: LedMode = LedMode::Pwm;
 
     loop {
         // Feed the watchdog
@@ -127,7 +134,7 @@ fn main() -> ! {
         temperature_adc_counts = adc.read(&mut temp_sense).unwrap();
         adc_volts = temperature_adc_counts as f64 * (3.3 / 4095.0);
         temp = 27.0 - ((adc_volts - 0.706) / 0.001721);
-        led_brightness = ((temp * 1000.0) - offset) as u16;
+        led_brightness = ((temp * 1000.0) - offset * 1000.0) as u16;
 
         if usb_dev.poll(&mut [&mut serial]) {
             let mut usb_buffer: [u8; 64] = [0u8; 64];
@@ -193,10 +200,27 @@ fn main() -> ! {
                                     }
                                     "offset" => {
                                         if let Ok(x) = args[1].parse::<f64>() {
-                                            offset = x * 1000.0;
+                                            offset = x;
                                         } else {
                                             let _ =
                                                 serial.write(b"please enter a correct offset\n");
+                                        }
+                                    }
+                                    "mode" => {
+                                        match args[1] {
+                                            "digital" => {
+                                                let _ = serial.write(b"led mode is now digital\n");
+                                                led_mode = LedMode::Digital;
+                                            }
+                                            "pwm" => {
+                                                let _ = serial.write(b"led mode is now pwm\n");
+                                                led_mode = LedMode::Pwm;
+                                            }
+                                            _ => {
+                                                let _ = serial.write(
+                                                b"please enter a valid mode, either pwm or digital\n",
+                                            );
+                                            }
                                         }
                                     }
                                     // TODO! add help
@@ -217,7 +241,13 @@ fn main() -> ! {
             }
 
             if led_enabled {
-                channel.set_duty(led_brightness);
+                if led_mode == LedMode::Pwm {
+                    channel.set_duty(led_brightness);
+                } else if temp >= offset {
+                    channel.set_duty(25000);
+                } else {
+                    channel.set_duty(0);
+                }
             }
         }
     }
