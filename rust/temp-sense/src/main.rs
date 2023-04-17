@@ -122,6 +122,7 @@ fn main() -> ! {
     let mut text: Vec<u8> = Vec::new();
     let mut prompt: bool = false;
     let mut command: &str = "";
+    let mut args: Vec<&str> = Vec::new();
 
     loop {
         // https://electrocredible.com/raspberry-pi-pico-temperature-sensor-tutorial/
@@ -163,6 +164,17 @@ fn main() -> ! {
                                 .unwrap()],
                         )
                         .unwrap();
+
+                        args = from_utf8(
+                            &text[text
+                                .iter()
+                                .position(|x| x == &b' ' || x == &b'\r' || x == &b'\n')
+                                .unwrap()..],
+                        )
+                        .unwrap()
+                        .trim()
+                        .split(' ')
+                        .collect::<Vec<&str>>();
 
                         match command {
                             "temp" => {
