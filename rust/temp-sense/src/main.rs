@@ -124,6 +124,8 @@ fn main() -> ! {
     let mut command: &str = "";
     let mut args: Vec<&str> = Vec::new();
 
+    let mut led_enabled: bool = true;
+
     loop {
         // https://electrocredible.com/raspberry-pi-pico-temperature-sensor-tutorial/
         let temperature_adc_counts: u16 = adc.read(&mut temp_sense).unwrap();
@@ -184,6 +186,19 @@ fn main() -> ! {
                                 let _ = serial.write(b"entering flash mode");
                                 hal::rom_data::reset_to_usb_boot(25, 0);
                             }
+                            "led" => {
+                                match args[0] {
+                                    "on" => {
+                                        led_enabled = true;
+                                    }
+                                    "off" => {
+                                        led_enabled = false;
+                                        channel.set_duty(0);
+                                    }
+                                    // TODO! add help
+                                    _ => {}
+                                }
+                            }
                             "" => {}
                             _ => {
                                 let _ = serial
@@ -192,8 +207,13 @@ fn main() -> ! {
                         }
 
                         text = Vec::new();
+                    }
+                }
             }
-            channel.set_duty(output);
+
+            if led_enabled {
+                channel.set_duty(output);
+            }
         }
     }
 }
