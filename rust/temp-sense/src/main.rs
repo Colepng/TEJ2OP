@@ -118,6 +118,11 @@ fn main() -> ! {
     // Enable the temperature sensor
     let mut temp_sense = adc.enable_temp_sensor();
 
+    let mut temperature_adc_counts: u16 = adc.read(&mut temp_sense).unwrap();
+    let mut adc_volts: f64 = temperature_adc_counts as f64 * (3.3 / 4095.0);
+    let mut temp: f64 = 27.0 - ((adc_volts - 0.706) / 0.001721);
+    let mut led_brightness = ((temp * 1000.0) - offset) as u16;
+
     // let mut led_pin = pins.led.into_push_pull_output();
     let mut text: Vec<u8> = Vec::new();
     let mut prompt: bool = false;
@@ -128,10 +133,13 @@ fn main() -> ! {
 
     loop {
         // https://electrocredible.com/raspberry-pi-pico-temperature-sensor-tutorial/
-        let temperature_adc_counts: u16 = adc.read(&mut temp_sense).unwrap();
-        let adc_volts: f64 = temperature_adc_counts as f64 * (3.3 / 4095.0);
-        let temp: f64 = 27.0 - ((adc_volts - 0.706) / 0.001721);
-        let output = ((temp * 1000.0) - 26000.0) as u16;
+
+        // Reads the counts from the on-chip temperature sensor
+        // calculates the actual temperature in celsius
+        temperature_adc_counts = adc.read(&mut temp_sense).unwrap();
+        adc_volts = temperature_adc_counts as f64 * (3.3 / 4095.0);
+        temp = 27.0 - ((adc_volts - 0.706) / 0.001721);
+        led_brightness = ((temp * 1000.0) - offset) as u16;
 
         if usb_dev.poll(&mut [&mut serial]) {
             let mut usb_buffer: [u8; 64] = [0u8; 64];
@@ -212,7 +220,7 @@ fn main() -> ! {
             }
 
             if led_enabled {
-                channel.set_duty(output);
+                channel.set_duty(led_brightness);
             }
         }
     }
