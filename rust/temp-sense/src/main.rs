@@ -117,6 +117,7 @@ fn main() -> ! {
 
     // Enable the temperature sensor
     let mut temp_sense = adc.enable_temp_sensor();
+    let mut offset: f64 = 26000.0;
 
     let mut temperature_adc_counts: u16 = adc.read(&mut temp_sense).unwrap();
     let mut adc_volts: f64 = temperature_adc_counts as f64 * (3.3 / 4095.0);
@@ -202,6 +203,14 @@ fn main() -> ! {
                                     "off" => {
                                         led_enabled = false;
                                         channel.set_duty(0);
+                                    }
+                                    "offset" => {
+                                        if let Ok(x) = args[1].parse::<f64>() {
+                                            offset = x * 1000.0;
+                                        } else {
+                                            let _ =
+                                                serial.write(b"please enter a correct offset\n");
+                                        }
                                     }
                                     // TODO! add help
                                     _ => {}
