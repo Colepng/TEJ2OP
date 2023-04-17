@@ -2,9 +2,7 @@
 #![no_main]
 
 use core::result::Result::{Err, Ok};
-use cortex_m::Peripherals;
 use embedded_hal::adc::OneShot;
-use embedded_hal::Pwm;
 use embedded_hal::PwmPin;
 use panic_halt as _;
 use rp_pico::entry;
@@ -23,13 +21,6 @@ use embedded_alloc::Heap;
 
 #[global_allocator]
 static HEAP: Heap = Heap::empty();
-
-fn compare(vector: &Vec<u8>, text: &str) -> bool {
-    if vector.len() >= text.len() && &vector[vector.len() - text.len()..] == text.as_bytes() {
-        return true;
-    }
-    false
-}
 
 #[entry]
 fn main() -> ! {
