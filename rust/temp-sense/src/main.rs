@@ -4,9 +4,9 @@
 use core::result::Result::{Err, Ok};
 use cortex_m::prelude::_embedded_hal_watchdog_Watchdog;
 use cortex_m::prelude::_embedded_hal_watchdog_WatchdogEnable;
-use fugit::ExtU32;
 use embedded_hal::adc::OneShot;
 use embedded_hal::PwmPin;
+use fugit::ExtU32;
 use panic_halt as _;
 use rp_pico::entry;
 use rp_pico::hal;
@@ -215,6 +215,7 @@ fn main() -> ! {
                                 }
                             }
                             "" => {}
+                            "test-watchdog" => loop {},
                             _ => {
                                 let _ = serial
                                     .write(format!("command not found: {command}\n").as_bytes());
