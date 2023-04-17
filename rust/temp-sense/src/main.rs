@@ -119,16 +119,16 @@ fn main() -> ! {
     let mut temp_sense = adc.enable_temp_sensor();
     let mut offset: f64 = 26000.0;
 
-    let mut temperature_adc_counts: u16 = adc.read(&mut temp_sense).unwrap();
-    let mut adc_volts: f64 = temperature_adc_counts as f64 * (3.3 / 4095.0);
-    let mut temp: f64 = 27.0 - ((adc_volts - 0.706) / 0.001721);
-    let mut led_brightness = ((temp * 1000.0) - offset) as u16;
+    let mut temperature_adc_counts: u16;
+    let mut adc_volts: f64;
+    let mut temp: f64;
+    let mut led_brightness: u16;
 
     // let mut led_pin = pins.led.into_push_pull_output();
     let mut text: Vec<u8> = Vec::new();
     let mut prompt: bool = false;
-    let mut command: &str = "";
-    let mut args: Vec<&str> = Vec::new();
+    let mut command: &str;
+    let mut args: Vec<&str>;
 
     let mut led_enabled: bool = true;
 
