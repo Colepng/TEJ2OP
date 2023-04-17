@@ -3,9 +3,9 @@
 
 use core::result::Result::{Err, Ok};
 use cortex_m::Peripherals;
+use embedded_hal::adc::OneShot;
 use embedded_hal::Pwm;
 use embedded_hal::PwmPin;
-use embedded_hal::adc::OneShot;
 use panic_halt as _;
 use rp_pico::entry;
 use rp_pico::hal;
