@@ -341,6 +341,7 @@ dependencies = [
  "cortex-m-rt",
  "embedded-alloc",
  "embedded-hal",
+ "fugit",
  "panic-halt",
  "rp-pico",
  "usb-device",

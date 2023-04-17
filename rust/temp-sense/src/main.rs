@@ -2,6 +2,9 @@
 #![no_main]
 
 use core::result::Result::{Err, Ok};
+use cortex_m::prelude::_embedded_hal_watchdog_Watchdog;
+use cortex_m::prelude::_embedded_hal_watchdog_WatchdogEnable;
+use fugit::ExtU32;
 use embedded_hal::adc::OneShot;
 use embedded_hal::PwmPin;
 use panic_halt as _;
@@ -36,6 +39,8 @@ fn main() -> ! {
 
     // Set up the watchdog driver
     let mut watchdog = hal::Watchdog::new(pac.WATCHDOG);
+    // Set to watchdog to reset if it's not reloaded within 1.05 seconds, and start it
+    watchdog.start(1.secs());
 
     // Setup up a clock at 125MHz
     let clocks = hal::clocks::init_clocks_and_plls(
@@ -124,6 +129,8 @@ fn main() -> ! {
     let mut led_enabled: bool = true;
 
     loop {
+        // Feed the watchdog
+        watchdog.feed();
         // https://electrocredible.com/raspberry-pi-pico-temperature-sensor-tutorial/
 
         // Reads the counts from the on-chip temperature sensor
