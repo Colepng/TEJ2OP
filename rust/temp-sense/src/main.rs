@@ -147,24 +147,26 @@ fn main() -> ! {
                 Ok(0) => {}
                 Err(_) => {}
                 Ok(n_bytes_read) => {
-                    text.push(usb_buffer[0]);
-
-                    let mut wr_ptr = &usb_buffer[..n_bytes_read];
-                    while !wr_ptr.is_empty() {
-                        match serial.write(wr_ptr) {
-                            Ok(len) => wr_ptr = &wr_ptr[len..],
-                            Err(_) => break,
-                        }
-                    }
                     match usb_buffer[0] {
                         8u8 => {
-                            let _ = serial.write(b" ");
-                            let _ = serial.write(&[8u8]);
-                            // let _ = serial.write(format!("remove {}", );
-                            text.pop();
-                            text.pop();
+                            if !text.is_empty() {
+                                let _ = serial.write(&[8u8]);
+                                let _ = serial.write(b" ");
+                                let _ = serial.write(&[8u8]);
+                                text.pop();
+                            }
                         }
-                        _ => {}
+                        _ => {
+                            text.push(usb_buffer[0]);
+
+                            let mut wr_ptr = &usb_buffer[..n_bytes_read];
+                            while !wr_ptr.is_empty() {
+                                match serial.write(wr_ptr) {
+                                    Ok(len) => wr_ptr = &wr_ptr[len..],
+                                    Err(_) => break,
+                                }
+                            }
+                        }
                     }
 
                     if !text.is_empty() {
