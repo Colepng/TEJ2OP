@@ -167,91 +167,97 @@ fn main() -> ! {
                         _ => {}
                     }
 
-                    if text[text.len() - 1] == b'\r' {
-                        prompt = false;
-                    }
-                    if !prompt {
-                        command = from_utf8(
-                            &text[..text
-                                .iter()
-                                .position(|x| x == &b' ' || x == &b'\r' || x == &b'\n')
-                                .unwrap()],
-                        )
-                        .unwrap();
+                    if !text.is_empty() {
+                        if text[text.len() - 1] == b'\r' {
+                            prompt = false;
+                        }
+                        if !prompt {
+                            command = from_utf8(
+                                &text[..text
+                                    .iter()
+                                    .position(|x| x == &b' ' || x == &b'\r' || x == &b'\n')
+                                    .unwrap()],
+                            )
+                            .unwrap();
 
-                        args = from_utf8(
-                            &text[text
-                                .iter()
-                                .position(|x| x == &b' ' || x == &b'\r' || x == &b'\n')
-                                .unwrap()..],
-                        )
-                        .unwrap()
-                        .trim()
-                        .split(' ')
-                        .collect::<Vec<&str>>();
+                            args = from_utf8(
+                                &text[text
+                                    .iter()
+                                    .position(|x| x == &b' ' || x == &b'\r' || x == &b'\n')
+                                    .unwrap()..],
+                            )
+                            .unwrap()
+                            .trim()
+                            .split(' ')
+                            .collect::<Vec<&str>>();
 
-                        match command {
-                            "temp" => {
-                                let _ = serial.write(format!("temperature {temp}\n").as_bytes());
-                            }
-                            "flash" => {
-                                let _ = serial.write(b"entering flash mode");
-                                hal::rom_data::reset_to_usb_boot(25, 0);
-                            }
-                            "led" => {
-                                match args[0] {
-                                    "on" => {
-                                        led_enabled = true;
-                                    }
-                                    "off" => {
-                                        led_enabled = false;
-                                        channel.set_duty(0);
-                                    }
-                                    "offset" => {
-                                        if let Ok(x) = args[1].parse::<f64>() {
-                                            offset = x;
-                                        } else {
-                                            let _ =
-                                                serial.write(b"please enter a correct offset\n");
+                            match command {
+                                "temp" => {
+                                    let _ =
+                                        serial.write(format!("temperature {temp}\n").as_bytes());
+                                }
+                                "flash" => {
+                                    let _ = serial.write(b"entering flash mode");
+                                    hal::rom_data::reset_to_usb_boot(25, 0);
+                                }
+                                "led" => {
+                                    match args[0] {
+                                        "on" => {
+                                            led_enabled = true;
                                         }
-                                    }
-                                    "mode" => {
-                                        if args.len() > 1 {
-                                            match args[1] {
-                                                "digital" => {
-                                                    let _ =
-                                                        serial.write(b"led mode is now digital\n");
-                                                    led_mode = LedMode::Digital;
-                                                }
-                                                "pwm" => {
-                                                    let _ = serial.write(b"led mode is now pwm\n");
-                                                    led_mode = LedMode::Pwm;
-                                                }
-                                                _ => {
-                                                    let _ = serial.write(
+                                        "off" => {
+                                            led_enabled = false;
+                                            channel.set_duty(0);
+                                        }
+                                        "offset" => {
+                                            if let Ok(x) = args[1].parse::<f64>() {
+                                                offset = x;
+                                            } else {
+                                                let _ = serial
+                                                    .write(b"please enter a correct offset\n");
+                                            }
+                                        }
+                                        "mode" => {
+                                            if args.len() > 1 {
+                                                match args[1] {
+                                                    "digital" => {
+                                                        let _ = serial
+                                                            .write(b"led mode is now digital\n");
+                                                        led_mode = LedMode::Digital;
+                                                    }
+                                                    "pwm" => {
+                                                        let _ =
+                                                            serial.write(b"led mode is now pwm\n");
+                                                        led_mode = LedMode::Pwm;
+                                                    }
+                                                    _ => {
+                                                        let _ = serial.write(
                                                 b"please enter a valid mode, either pwm or digital\n",
                                             );
+                                                    }
                                                 }
+                                            } else {
+                                                let _ = serial.write(
+                                                    format!("Current mode: {:?}\n", led_mode)
+                                                        .as_bytes(),
+                                                );
                                             }
-                                        } else {
-                                            let _ = serial.write(
-                                                format!("Current mode: {:?}\n", led_mode).as_bytes(),
-                                            );
                                         }
+                                        // TODO! add help
+                                        _ => {}
                                     }
-                                    // TODO! add help
-                                    _ => {}
+                                }
+                                "" => {}
+                                "test-watchdog" => loop {},
+                                _ => {
+                                    let _ = serial.write(
+                                        format!("command not found: {command}\n").as_bytes(),
+                                    );
                                 }
                             }
-                            "" => {}
-                            "test-watchdog" => loop {},
-                            _ => {
-                                let _ = serial
-                                    .write(format!("command not found: {command}\n").as_bytes());
-                            }
-                        }
 
-                        text = Vec::new();
+                            text = Vec::new();
+                        }
                     }
                 }
             }
