@@ -216,20 +216,27 @@ fn main() -> ! {
                                         }
                                     }
                                     "mode" => {
-                                        match args[1] {
-                                            "digital" => {
-                                                let _ = serial.write(b"led mode is now digital\n");
-                                                led_mode = LedMode::Digital;
-                                            }
-                                            "pwm" => {
-                                                let _ = serial.write(b"led mode is now pwm\n");
-                                                led_mode = LedMode::Pwm;
-                                            }
-                                            _ => {
-                                                let _ = serial.write(
+                                        if args.len() > 1 {
+                                            match args[1] {
+                                                "digital" => {
+                                                    let _ =
+                                                        serial.write(b"led mode is now digital\n");
+                                                    led_mode = LedMode::Digital;
+                                                }
+                                                "pwm" => {
+                                                    let _ = serial.write(b"led mode is now pwm\n");
+                                                    led_mode = LedMode::Pwm;
+                                                }
+                                                _ => {
+                                                    let _ = serial.write(
                                                 b"please enter a valid mode, either pwm or digital\n",
                                             );
+                                                }
                                             }
+                                        } else {
+                                            let _ = serial.write(
+                                                format!("Current mode: {:?}\n", led_mode).as_bytes(),
+                                            );
                                         }
                                     }
                                     // TODO! add help
