@@ -126,6 +126,7 @@ fn main() -> ! {
     loop {
         // Feed the watchdog
         watchdog.feed();
+
         // https://electrocredible.com/raspberry-pi-pico-temperature-sensor-tutorial/
 
         // Reads the counts from the on-chip temperature sensor
@@ -245,9 +246,25 @@ fn main() -> ! {
                                                 );
                                             }
                                         }
+
                                         // TODO! add help
                                         _ => {}
                                     }
+                                }
+                                "help" => {
+                                    // buffer might be full, instead of writing mutiple times
+                                    // deal with the buffer being full
+                                    let _ = serial.write(b"\
+                                                         The following are valid commands\n\
+                                                         led - controls the led on gpio25\n\
+                                                         ");
+                                    let _ = serial.write(b"\
+                                                         temp - prints out the current temperature of the on-chip temperature sensor\n\
+                                                         flash - boots the board into coldboot\n\
+                                                         ");
+                                    let _ = serial.write(b"\
+                                                         help - this menu\n\
+                                                         ");
                                 }
                                 "" => {}
                                 "test-watchdog" => loop {},
