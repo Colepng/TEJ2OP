@@ -158,14 +158,14 @@ fn main() -> ! {
                         }
                     }
                     match usb_buffer[0] {
-                    8u8 => {
-                        let _ = serial.write(b" ");
-                        let _ = serial.write(&[8u8]);
-                        // let _ = serial.write(format!("remove {}", );
-                        text.pop();
-                        text.pop();
-                    }
-                    _ => {}
+                        8u8 => {
+                            let _ = serial.write(b" ");
+                            let _ = serial.write(&[8u8]);
+                            // let _ = serial.write(format!("remove {}", );
+                            text.pop();
+                            text.pop();
+                        }
+                        _ => {}
                     }
 
                     if text[text.len() - 1] == b'\r' {
