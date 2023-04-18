@@ -115,7 +115,6 @@ fn main() -> ! {
     let mut temp: f64;
     let mut led_brightness: u16;
 
-    // let mut led_pin = pins.led.into_push_pull_output();
     let mut text: Vec<u8> = Vec::new();
     let mut prompt: bool = false;
     let mut command: &str;
