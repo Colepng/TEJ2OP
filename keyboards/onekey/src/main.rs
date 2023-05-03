@@ -6,9 +6,8 @@ use embedded_hal::digital::v2::InputPin;
 use embedded_hal::digital::v2::OutputPin;
 use fugit::ExtU32;
 use panic_halt as _;
-use rp_pico::hal::gpio::pin::Pin;
+use rp_pico::hal::gpio::Pin;
 use rp_pico::hal::pac::interrupt;
-use rp_pico::hal::Clock;
 use rp_pico::{entry, hal};
 use usb_device::{
     class_prelude::UsbBusAllocator,
@@ -17,8 +16,6 @@ use usb_device::{
 
 // USB Human Interface Device (HID) Class support
 // use usbd_hid::descriptor::generator_prelude::*;
-// use usbd_hid::descriptor::MouseReport;
-use cortex_m::peripheral::NVIC;
 use usbd_hid::descriptor::KeyboardReport;
 use usbd_hid::descriptor::SerializedDescriptor;
 use usbd_hid::hid_class;
@@ -92,19 +89,9 @@ fn main() -> ! {
         },
     );
 
-    // let usb_hid = hid_class::HIDClass::new(bus_ref, KeyboardReport::desc(), 60);
-
     unsafe {
         USB_HID = Some(usb_hid);
     }
-
-    // Create a USB device with a fake VID and PID
-    // let usb_dev = UsbDeviceBuilder::new(bus_ref, UsbVidPid(0x16c0, 0x27dd))
-    //     .manufacturer("Cole corp")
-    //     .product("One key keyboard")
-    //     .serial_number("TEST")
-    //     .device_class(3)
-    //     .build();Gen
 
     let usb_dev = UsbDeviceBuilder::new(bus_ref, UsbVidPid(0x16c0, 0x27da))
         .manufacturer("Cole corp")
@@ -122,79 +109,40 @@ fn main() -> ! {
         hal::pac::NVIC::unmask(hal::pac::interrupt::USBCTRL_IRQ);
     };
 
-    let mut pin17 = pins.gpio17.into_readable_output();
-    pin17.set_high().unwrap();
-    let pin16 = pins.gpio16.into_pull_down_input();
     let mut led = pins.led.into_push_pull_output();
-    // let core = hal::pac::CorePeripherals::take().unwrap();
-    // let mut delay = cortex_m::delay::Delay::new(core.SYST, clocks.system_clock.freq().to_Hz());
+
+    let cols: [Pin<_, _>; 1] = [pins.gpio16.into_pull_down_input()];
+    let rows: [Pin<_, _>; 1] = [pins.gpio17.into_readable_output()];
+
+    for mut i in rows {
+        i.set_high().unwrap();
+    }
 
     loop {
         // feed watchdog
         watchdog.feed();
-        // usb_dev.poll(&mut [&mut usb_hid]);
-        // if pin16.is_high().unwrap() {
-        //     led.set_high().unwrap()
-        //     // let _ = &mut usb_hid.push_input(&KeyboardReport { modifier: 0x00, reserved: 0x00, leds: 0x00, keycodes: [0x04, 0x00, 0x00, 0x00, 0x00, 0x00]});
-        // } else {
-        //     led.set_low().unwrap()
-        // }
-        //    led.set_high().unwrap()
-        // } else {
-        //    led.set_low().unwrap()
-        // }
-        //temp
-        // if temp {
-        // delay.delay_ms(100);
-        if pin16.is_high().unwrap() {
-            let b = KeyboardReport {
-                modifier: 0x00,
-                reserved: 0x00,
-                leds: 0x00,
-                keycodes: [0x5, 0x00, 0x00, 0x00, 0x00, 0x00],
-            };
-            push_keyboard_inputs(b)
-            .ok()
-            .unwrap_or(0);
-            led.set_high().unwrap();
-        } else {
-            let b = KeyboardReport {
-                modifier: 0x00,
-                reserved: 0x00,
-                leds: 0x00,
-                keycodes: [0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
-            };
-            push_keyboard_inputs(b)
-            .ok()
-            .unwrap_or(0);
-            led.set_low().unwrap();
+
+        for i in &cols {
+            if i.is_high().unwrap_or(false) {
+                let b = KeyboardReport {
+                    modifier: 0x00,
+                    reserved: 0x00,
+                    leds: 0x00,
+                    keycodes: [0x5, 0x00, 0x00, 0x00, 0x00, 0x00],
+                };
+                push_keyboard_inputs(b).ok().unwrap_or(0);
+                led.set_high().unwrap();
+            } else {
+                let b = KeyboardReport {
+                    modifier: 0x00,
+                    reserved: 0x00,
+                    leds: 0x00,
+                    keycodes: [0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+                };
+                push_keyboard_inputs(b).ok().unwrap_or(0);
+                led.set_low().unwrap();
+            }
         }
-        // delay.delay_ms(100);
-        // let a = KeyboardReport {
-        //     modifier: 0x00,
-        //     reserved: 0x00,
-        //     leds: 0x00,
-        //     keycodes: [0x00; 6],
-        // };
-        //
-        // push_keyboard_inputs(a)
-        // .ok()
-        // .unwrap_or(0);
-        // temp = false;
-        // } else {
-        // delay.delay_ms(100);
-        //
-        // push_keyboard_inputs(KeyboardReport {
-        //     modifier: 0x00,
-        //     reserved: 0x00,
-        //     leds: 0x00,
-        //     keycodes: [0x05, 0x00, 0x00, 0x00, 0x00, 0x00],
-        // })
-        // .ok()
-        // .unwrap_or(0);
-        // led.set_low().unwrap();
-        // temp = true;
-        // }
     }
 }
 
