@@ -7,7 +7,6 @@ use embedded_hal::digital::v2::OutputPin;
 use fugit::ExtU32;
 use panic_halt as _;
 use rp_pico::hal::gpio::bank0;
-use rp_pico::hal::gpio::AnyPin;
 use rp_pico::hal::gpio::Input;
 use rp_pico::hal::gpio::Output;
 use rp_pico::hal::gpio::Pin;
@@ -15,7 +14,6 @@ use rp_pico::hal::gpio::PullDown;
 use rp_pico::hal::gpio::Readable;
 use rp_pico::hal::pac::interrupt;
 use rp_pico::{entry, hal};
-use usb_device::endpoint::Out;
 use usb_device::{
     class_prelude::UsbBusAllocator,
     prelude::{UsbDevice, UsbDeviceBuilder, UsbVidPid},
@@ -23,7 +21,6 @@ use usb_device::{
 
 // USB Human Interface Device (HID) Class support
 // use usbd_hid::descriptor::generator_prelude::*;
-use heapless::FnvIndexMap;
 use usbd_hid::descriptor::KeyboardReport;
 use usbd_hid::descriptor::SerializedDescriptor;
 use usbd_hid::hid_class;
@@ -119,13 +116,7 @@ fn main() -> ! {
 
     // let mut led = pins.led.into_push_pull_output();
 
-    // let cols: [Pin<_, _>; 1] = [pins.gpio16.into_pull_down_input()];
-    // let mut rows: [Pin<_, _>; 1] = [pins.gpio17.into_readable_output()];
-    //
     let power_row: bool = false;
-    // let mut temp = FnvIndexMap::<_, _, 3>::new();
-    // temp.insert("Pin0", pins.gpio1.into_readable_output());
-    // temp.insert("Pin1", pins.gpio2.into_readable_output());
 
     let keys = [
         [0x04, 0x05, 0x06], 
@@ -144,8 +135,15 @@ fn main() -> ! {
     }
 
     if power_row {
-        let cols: [Pin<_, _>; 1] = [pins.gpio16.into_pull_down_input()];
-        let mut rows: [Pin<_, _>; 1] = [pins.gpio17.into_readable_output()];
+        let mut rows = [
+            OutputPins::GP28(pins.gpio28.into_readable_output()),
+            OutputPins::GP26(pins.gpio26.into_readable_output()),
+            OutputPins::GP17(pins.gpio17.into_readable_output()),
+        ];
+        let cols = [
+            InputPins::GP16(pins.gpio16.into_pull_down_input()),
+            InputPins::GP15(pins.gpio15.into_pull_down_input()),
+        ];
 
         loop {
             // feed watchdog
@@ -154,14 +152,32 @@ fn main() -> ! {
             let mut keycodes: [u8; 6] = [0x00; 6];
             let mut index: usize = 0;
             for (row, pin) in rows.iter_mut().enumerate() {
-                pin.set_high().unwrap();
+                match pin {
+                    OutputPins::GP17(x) => x.set_high().unwrap(),
+                    OutputPins::GP26(x) => x.set_high().unwrap(),
+                    OutputPins::GP28(x) => x.set_high().unwrap(),
+                }
                 for (col, pin) in cols.iter().enumerate() {
-                    if index <= 6 && pin.is_high().unwrap() {
-                        keycodes[index] = keys[row][col];
-                        index += 1;
+                    match pin {
+                        InputPins::GP15(x) => {
+                            if index <= 6 && x.is_high().unwrap() {
+                                keycodes[index] = keys[row][col];
+                                index += 1;
+                            }
+                        }
+                        InputPins::GP16(x) => {
+                            if index <= 6 && x.is_high().unwrap() {
+                                keycodes[index] = keys[row][col];
+                                index += 1;
+                            }
+                        }
                     }
                 }
-                pin.set_low().unwrap();
+                match pin {
+                    OutputPins::GP17(x) => x.set_low().unwrap(),
+                    OutputPins::GP26(x) => x.set_low().unwrap(),
+                    OutputPins::GP28(x) => x.set_low().unwrap(),
+                }
             }
             let report = KeyboardReport {
                 modifier: 0x00,
@@ -215,8 +231,6 @@ fn main() -> ! {
                     OutputPins::GP28(x) => x.set_low().unwrap(),
                 }
             }
-            //     pin.unwrap().set_high().unwrap();
-            //     pin.set_low().unwrap();
             let report = KeyboardReport {
                 modifier: 0x00,
                 reserved: 0x00,
@@ -227,34 +241,6 @@ fn main() -> ! {
         }
     }
 }
-// pub struct Cols<P0, P1, P2>
-// where
-//     P0: AnyPin,
-//     P1: AnyPin,
-//     P2: AnyPin,
-// {
-//     pin0: P0,
-//     pin1: P1,
-//     pin2: P2,
-//     arrpin: [P0, P1, P2],
-// }
-// pub struct Rows<P0, P1>
-// where
-//     P0: AnyPin,
-//     P1: AnyPin,
-// {
-//     pin0: P0,
-//     pin1: P1,
-// }
-
-// pub struct Example<P: AnyPin> {
-//     pin: P,
-// }
-//
-// impl<P: AnyPin1> Example<P>{
-//     pub fn check() {
-//     }
-// }
 
 fn push_keyboard_inputs(report: KeyboardReport) -> Result<usize, usb_device::UsbError> {
     critical_section::with(|_| unsafe {
